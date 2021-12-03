@@ -1,121 +1,51 @@
-const express = require('express')
+var express = require('express');
+var passport = require('passport');
+var path = require('path');
+var cookieParser = require('cookie-parser');
+var logger = require('morgan');
 
-// creating an express instance
-const app = express()
+var indexRouter = require('./routes/index');
+var authRouter = require('./routes/auth');
+var myaccountRouter = require('./routes/myaccount');
+var usersRouter = require('./routes/users');
 
-const cookieSession = require('cookie-session')
-const bodyParser = require('body-parser')
-const passport = require('passport')
+var app = express();
 
-// getting the local authentication type
-const LocalStrategy = require('passport-local').Strategy
+require('./boot/db')();
+require('./boot/auth')();
 
 const publicRoot = 'Users/user/Documents/program/vueauthclient/dist'
 app.use(express.static(publicRoot))
 
-app.use(bodyParser.json())
-app.use(cookieSession({
-    name: 'mysession',
-    keys: ['vueauthrandomkey'],
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours 
-  }))
+// // view engine setup
+// app.set('views', path.join(__dirname, 'views'));
+// app.set('view engine', 'ejs');
 
-app.use(passport.initialize());
-app.use(passport.session());
-
-let users = [
-    {
-        id: 1,
-        name: "Wong Yong Ren",
-        email: "wongyongren@hotmail.com",
-        password: "password"
-    },
-    {
-        id: 2,
-        name: "User",
-        email: "user@email.com",
-        password: "password2"
-    },
-    
-    {
-        id: 3,
-        name: "Admin",
-        email: "admin",
-        password: "admin"
-    },
-]
-
-app.get("/", (req, res, next) => {
-  res.sendFile("index.html", { root: publicRoot })
-})
-
-app.post("/api/login", (req, res, next) => {
-    passport.authenticate('local', (err, user, info) => {
-        if (err) {
-            return next(err);
-        }
-        
-        if (!user) {
-            return res.status(400).send([user, "Cannot log in", info])
-        }
-
-        req.login(user, (err) => {
-            res.send("Logged in")
-        })
-    })(req, res, next)
-})
-
-app.get('/api/logout', function(req, res){
-    req.logout();
-    console.log("logged out")
-    return res.send();
+// Use application-level middleware for common functionality, including
+// logging, parsing, and session handling.
+app.use(logger('dev'));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(require('express-session')({ secret: 'keyboard cat', resave: false, saveUninitialized: false }));
+app.use(function(req, res, next) {
+  var msgs = req.session.messages || [];
+  res.locals.messages = msgs;
+  res.locals.hasMessages = !! msgs.length;
+  req.session.messages = [];
+  next();
 });
+app.use(passport.initialize());
+app.use(passport.authenticate('session'));
 
-const authMiddleware = (req, res, next) => {
-    if (!req.isAuthenticated()) {
-        res.status(401).send('You are not authenticated')
-    } else {
-        return next()
-    }
-}
+// Define routes.
+app.use('/', indexRouter);
+app.use('/', authRouter);
+app.use('/myaccount', myaccountRouter);
+app.use('/', usersRouter);
 
-app.get("/api/user", authMiddleware, (req, res) => {
-    let user = users.find((user) => {
-        return user.id === req.session.passport.user
-    })
-    console.log([user, req.session])
-    res.send({user: user})
-})
-
-passport.use(new LocalStrategy({
-    usernameField: 'email',
-    passwordField: 'password'
-  }, 
-  (username, password, done) => {
-      let user = users.find((user) => {
-          return user.email === username && user.password === password
-      })
-      
-      if (user) {
-          done(null, user)
-      } else {
-          done(null, false, {message: 'Incorrect username or password'})
-      }
-  }
-))
-
-passport.serializeUser((user, done) => {
-  done(null, user.id)
-})
-
-passport.deserializeUser((id, done) => {
-  let user = users.find((user) => {
-      return user.id === id
-  })
-
-  done(null, user)
-})
 
 app.listen(3000, () => {
-  console.log("Example app listening on port 3000")
+    console.log("Example app listening on port 3000")
 })
