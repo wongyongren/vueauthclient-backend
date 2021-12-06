@@ -72,26 +72,13 @@ router.get('/api/user',
     });
   });
 
-router.get('/api/logout', function (req, res,  next) {
+router.get('/api/logout', function (req, res, next) {
   console.log("logged out")
   console.log(req.user)
   req.logOut();
   req.logout();
   console.log(req.user)
   res.send(req.user);
-  // res.clearCookie('sid', { path: '/' });
-  // res.send({ user: null });
-  // res.send(req.user)
-  // res.end();
-  // res.clearCookie('sid', { path: '/' });
-  // req.session.destroy(function (err) {
-  //   res.redirect('/');
-  // });
-
-
-  // res.redirect('/');
-  
-
 });
 
 module.exports = router;
