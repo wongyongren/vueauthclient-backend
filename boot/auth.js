@@ -26,7 +26,8 @@ module.exports = function() {
         var user = {
           id: row.id.toString(),
           username: row.username,
-          displayName: row.name
+          displayName: row.name,
+          role:row.role
         };
         return cb(null, user);
       });
@@ -43,7 +44,7 @@ module.exports = function() {
   // deserializing.
   passport.serializeUser(function(user, cb) {
     process.nextTick(function() {
-      cb(null, { id: user.id, username: user.username });
+      cb(null, { id: user.id, username: user.username,role: user.role });
     });
   });
 

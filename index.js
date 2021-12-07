@@ -4,10 +4,10 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
-var indexRouter = require('./routes/index');
-var authRouter = require('./routes/auth');
-var myaccountRouter = require('./routes/myaccount');
-var usersRouter = require('./routes/users');
+var routes = require('./routes');
+// var authRouter = require('./routes/auth');
+// var myaccountRouter = require('./routes/myaccount');
+// var usersRouter = require('./routes/users');
 
 var app = express();
 
@@ -40,10 +40,7 @@ app.use(passport.initialize());
 app.use(passport.authenticate('session'));
 
 // Define routes.
-app.use('/', indexRouter);
-app.use('/', authRouter);
-app.use('/myaccount', myaccountRouter);
-app.use('/', usersRouter);
+app.use(routes);
 
 
 app.listen(3000, () => {
