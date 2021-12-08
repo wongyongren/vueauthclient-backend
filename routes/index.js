@@ -5,8 +5,9 @@ const LocalStrategy = require('passport-local').Strategy
 var ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn;
 var db = require('../db');
 var router = express.Router();
-const isAuth = require('./authMiddleware').isAuth;
+const isUser = require('./authMiddleware').isUser;
 const isAdmin = require('./authMiddleware').isAdmin;
+const isAdminorSupervisor = require('./authMiddleware').isAdminorSupervisor;
 
 /* GET users listing. */
 
@@ -60,16 +61,39 @@ router.post('/api/register', function (req, res, next) {
   });
 });
 
+router.post('/api/registerproject', function (req, res, next) {
+  db.run('INSERT INTO project (projectname,projectaddress) VALUES (?, ?)', [
+    req.body.projectname,
+    req.body.projectadddress,
+  ], function (err) {
+    if (err) { return next(err); }
+    var project = {
+      id: this.lastID.toString(),
+      projectname: req.body.projectname,
+      projectaddress: req.body.projectaddress
+    };
+    req.login(project, function (err) {
+      if (err) { return next(err); }
+      res.send("Register Project Done")
+      // res.redirect('/');
+    });
+  });
+
+  
+});
+
+
 
 /* GET users listing. */
 router.get('/api/user',
-  ensureLoggedIn(), isAdmin,
+  ensureLoggedIn(), isAdminorSupervisor,
   function (req, res, next) {
     //console.log(req.user)
     db.get('SELECT rowid AS id, username, name, role FROM employee WHERE rowid = ?', [req.user.id], function (err, row) {
-      if (err) { 
+      if (err) {
         console.log(err)
-        return next(err); }
+        return next(err);
+      }
 
       var user = {
         id: row.id.toString(),
@@ -83,7 +107,7 @@ router.get('/api/user',
   });
 
 router.get('/api/user1',
-  ensureLoggedIn(), 
+  ensureLoggedIn(), isUser,
   function (req, res, next) {
     //console.log(req.user)
     db.get('SELECT rowid AS id, username, name, role FROM employee WHERE rowid = ?', [req.user.id], function (err, row) {
