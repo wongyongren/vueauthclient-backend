@@ -79,7 +79,7 @@ router.post('/api/registerproject', function (req, res, next) {
     });
   });
 
-  
+
 });
 
 
@@ -123,6 +123,32 @@ router.get('/api/user1',
 
     });
   });
+
+router.get('/api/projectname', function (req, res, next) {
+  //console.log(req.user)
+  db.all("SELECT * FROM project", function (err, row) {
+    if (err) {
+      console.log(err)
+      return next(err);
+    }
+    console.log(row)
+    res.json(row)
+  });
+});
+
+router.get('/api/workername', function (req, res, next) {
+  //console.log(req.user)
+  db.all('SELECT * FROM employee where role = "Supervisor" OR role = "User"' ,function (err, row) {
+    if (err) {
+      console.log(err)
+      return next(err);
+    }
+    console.log(row)
+    res.json(row)
+
+  });
+});
+
 router.get('/api/logout', function (req, res, next) {
   console.log("logged out")
 
