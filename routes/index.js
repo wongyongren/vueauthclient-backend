@@ -78,8 +78,46 @@ router.post('/api/registerproject', function (req, res, next) {
       // res.redirect('/');
     });
   });
+});
 
+router.post('/api/assignproject', function (req, res, next) {
+  for (let i = 0; i < req.body.workerid.length; i++) {
+    console.log(req.body.workerid[i])
+  }
+  // db.run('INSERT INTO supervisor (projectid,userid) VALUES (?, ?)', [
+  //   req.body.projectid,
+  //   req.body.supervisorid,
+  // ], function (err) {
+  //   if (err) { return next(err); }
+  //   // var project = {
+  //   //   id: this.lastID.toString(),
+  //   //   projectname: req.body.projectname,
+  //   //   projectaddress: req.body.projectaddress
+  //   // };
+  //   // req.login(project, function (err) {
+  //   //   if (err) { return next(err); }
 
+  //   //   // res.redirect('/');
+  //   // });
+  // });
+  // db.run('INSERT INTO worker (projectid,userid,supervisorid) VALUES (?, ?, ?)', [
+  //   req.body.projectid,
+  //   req.body.workerid,
+  //   req.body.supervisorid,
+  // ], function (err) {
+  //   if (err) { return next(err); }
+  //   // var project = {
+  //   //   id: this.lastID.toString(),
+  //   //   projectname: req.body.projectname,
+  //   //   projectaddress: req.body.projectaddress
+  //   // };
+  //   // req.login(project, function (err) {
+  //   //   if (err) { return next(err); }
+  //   //  res.send("Register Project Done")
+  //   // res.redirect('/');
+  //   // });
+  // });
+  res.send("Register Project Done")
 });
 
 
@@ -138,7 +176,7 @@ router.get('/api/projectname', function (req, res, next) {
 
 router.get('/api/workername', function (req, res, next) {
   //console.log(req.user)
-  db.all('SELECT * FROM employee where role = "Supervisor" OR role = "User"' ,function (err, row) {
+  db.all('SELECT * FROM employee where role = "Supervisor" OR role = "User"', function (err, row) {
     if (err) {
       console.log(err)
       return next(err);

@@ -18,21 +18,32 @@ module.exports = function () {
       projectname TEXT UNIQUE,\
       projectaddress TEXT \
     )");
-    db.run("CREATE TABLE IF NOT EXISTS supervisor ( \
-      supervisorid INTEGER PRIMARY KEY AUTOINCREMENT,\
+    // db.run("CREATE TABLE IF NOT EXISTS supervisor ( \
+    //   supervisorid INTEGER PRIMARY KEY AUTOINCREMENT,\
+    //   projectid INTEGER,\
+    //   userid INTEGER, \
+    //   teamid INTEGER, \
+	  //   FOREIGN KEY (userid) REFERENCES employee(userid), \
+	  //   FOREIGN KEY (projectid) REFERENCES project(projectid) \
+    // )");
+    // db.run("CREATE TABLE IF NOT EXISTS worker ( \
+    //   workerid INTEGER PRIMARY KEY AUTOINCREMENT,\
+    //   projectid INTEGER,\
+    //   userid INTEGER, \
+	  //   supervisorid INTEGER,\
+    //   teamid INTEGER, \
+	  //   FOREIGN KEY (userid) REFERENCES employee(userid), \
+	  //   FOREIGN KEY (supervisorid) REFERENCES supervisor(supervisorid), \
+	  //   FOREIGN KEY (projectid) REFERENCES project(projectid) \
+    // )");
+    db.run("CREATE TABLE IF NOT EXISTS team ( \
+      teamnumber INTEGER PRIMARY KEY,\
+	    teamid INTEGER, \
       projectid INTEGER,\
       userid INTEGER, \
+	    supervisororworker INTEGER,\
 	    FOREIGN KEY (userid) REFERENCES employee(userid), \
-	    FOREIGN KEY (projectid) REFERENCES project(projectid) \
-    )");
-    db.run("CREATE TABLE IF NOT EXISTS worker ( \
-      workerid INTEGER PRIMARY KEY AUTOINCREMENT,\
-      projectid INTEGER,\
-      userid INTEGER, \
-	    supervisorid INTEGER,\
-	    FOREIGN KEY (userid) REFERENCES employee(userid), \
-	    FOREIGN KEY (supervisorid) REFERENCES supervisor(supervisorid), \
-	    FOREIGN KEY (projectid) REFERENCES project(projectid) \
+      FOREIGN KEY (projectid) REFERENCES project(projectid) \
     )");
   });
 
