@@ -81,42 +81,50 @@ router.post('/api/registerproject', function (req, res, next) {
 });
 
 router.post('/api/assignproject', function (req, res, next) {
-  for (let i = 0; i < req.body.workerid.length; i++) {
-    console.log(req.body.workerid[i])
-  }
-  // db.run('INSERT INTO supervisor (projectid,userid) VALUES (?, ?)', [
-  //   req.body.projectid,
-  //   req.body.supervisorid,
-  // ], function (err) {
-  //   if (err) { return next(err); }
-  //   // var project = {
-  //   //   id: this.lastID.toString(),
-  //   //   projectname: req.body.projectname,
-  //   //   projectaddress: req.body.projectaddress
-  //   // };
-  //   // req.login(project, function (err) {
-  //   //   if (err) { return next(err); }
+  db.all("SELECT teamid FROM team", function (err, res) {
+    console.log(req.body)
+    var i = res.length - 1;
+    if (err) { console.log(err) }
+    if (res == '') {
+      var teamid = res + 1;
+    } else {
+      var teamid = parseInt(JSON.stringify(res[i].teamid)) + 1;
+    }
+    db.run('INSERT INTO team (teamid,projectid,userid,supervisororworker) VALUES (?, ?, ?, 1)', [
+      teamid,
+      req.body.projectid,
+      req.body.supervisorid,
+    ], function (err) {
+      if (err) { return next(err); }
+      var project = {
+        id: this.lastID.toString(),
+        projectid: req.body.projectid,
+        supervisorid: req.body.supervisorid
+      };
+      req.login(project, function (err) {
+        if (err) { return next(err); }
+      });
+    });
 
-  //   //   // res.redirect('/');
-  //   // });
-  // });
-  // db.run('INSERT INTO worker (projectid,userid,supervisorid) VALUES (?, ?, ?)', [
-  //   req.body.projectid,
-  //   req.body.workerid,
-  //   req.body.supervisorid,
-  // ], function (err) {
-  //   if (err) { return next(err); }
-  //   // var project = {
-  //   //   id: this.lastID.toString(),
-  //   //   projectname: req.body.projectname,
-  //   //   projectaddress: req.body.projectaddress
-  //   // };
-  //   // req.login(project, function (err) {
-  //   //   if (err) { return next(err); }
-  //   //  res.send("Register Project Done")
-  //   // res.redirect('/');
-  //   // });
-  // });
+    for (let i = 0; i < req.body.workerid.length; i++) {
+      // console.log(req.body.workerid[i])
+      db.run('INSERT INTO team (teamid,projectid,userid,supervisororworker) VALUES (?, ?, ?, 0)', [
+        teamid,
+        req.body.projectid,
+        req.body.workerid[i]
+      ], function (err) {
+        if (err) { return next(err); }
+        var project = {
+          id: this.lastID.toString(),
+          projectid: req.body.projectid,
+          workerid: req.body.workerid[i]
+        };
+        req.login(project, function (err) {
+          if (err) { return next(err); }
+        });
+      });
+    }
+  });
   res.send("Register Project Done")
 });
 
@@ -184,6 +192,32 @@ router.get('/api/workername', function (req, res, next) {
     console.log(row)
     res.json(row)
 
+  });
+});
+
+// for supervisor name
+router.get('/api/filtersupervisor', function (req, res, next) {
+  //console.log(req.user)
+  db.all('select name,projectname from team,employee,project  where team.projectid = ?  and team.projectid = project.projectid  and employee.userid = team.userid  and team.supervisororworker = 1', [req.body.projectid], function (err, row) {
+    if (err) {
+      console.log(err)
+      return next(err);
+    }
+    console.log(row)
+    res.json(row)
+  });
+});
+
+// for worker name
+router.get('/api/projectname', function (req, res, next) {
+  //console.log(req.user)
+  db.all("SELECT * FROM project", function (err, row) {
+    if (err) {
+      console.log(err)
+      return next(err);
+    }
+    console.log(row)
+    res.json(row)
   });
 });
 
