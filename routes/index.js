@@ -195,10 +195,22 @@ router.get('/api/workername', function (req, res, next) {
   });
 });
 
-// for supervisor name
-router.get('/api/filtersupervisor', function (req, res, next) {
-  //console.log(req.user)
-  db.all('select name,projectname from team,employee,project  where team.projectid = ?  and team.projectid = project.projectid  and employee.userid = team.userid  and team.supervisororworker = 1', [req.body.projectid], function (err, row) {
+// for supervisor nameW
+router.post('/api/filtersupervisor', function (req, res, next) {
+  console.log(req.body.projectid)
+  db.all('select name,employee.userid,teamid from team,employee,project  where team.projectid = ?  and team.projectid = project.projectid  and employee.userid = team.userid  and team.supervisororworker = 1', [req.body.projectid], function (err, row) {
+    if (err) {
+      console.log(err)
+      return next(err);
+    }
+    console.log(row)
+    res.json(row)
+  });
+});
+
+router.post('/api/getworkerdata', function (req, res, next) {
+  console.log(req.body.projectid)
+  db.all('select username,name,projectname,project.projectid,team.teamid from team,employee,project  where team.projectid = ? and team.teamid = ? and team.projectid = project.projectid  and employee.userid = team.userid  and team.supervisororworker = 0', [req.body.projectid,req.body.teamid], function (err, row) {
     if (err) {
       console.log(err)
       return next(err);
