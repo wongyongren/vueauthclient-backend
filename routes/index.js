@@ -81,51 +81,33 @@ router.post('/api/registerproject', function (req, res, next) {
 });
 
 router.post('/api/assignproject', function (req, res, next) {
-  db.all("SELECT teamid FROM team", function (err, res) {
+  db.all("SELECT teamid FROM team ORDER BY teamid ASC", function (err, res) {
     console.log(req.body)
     var i = res.length - 1;
     if (err) { console.log(err) }
+    console.log(res.length)
     if (res == '') {
       var teamid = res + 1;
     } else {
       var teamid = parseInt(JSON.stringify(res[i].teamid)) + 1;
     }
-    db.run('INSERT INTO team (teamid,projectid,userid,supervisororworker) VALUES (?, ?, ?, 1)', [
-      teamid,
-      req.body.projectid,
-      req.body.supervisorid,
+    db.run('INSERT INTO team (teamname,description) VALUES (?, ?)', [
+      req.body.team,
+      req.body.team,
     ], function (err) {
-      if (err) { return next(err); }
-      var project = {
-        id: this.lastID.toString(),
-        projectid: req.body.projectid,
-        supervisorid: req.body.supervisorid
-      };
-      req.login(project, function (err) {
-        if (err) { return next(err); }
-      });
+      if (err) { return next(err); } else {
+        for (let i = 0; i < req.body.workerid.length; i++) {
+          db.run('INSERT INTO team_member (teamid,roleid,userid,projectid) VALUES (?, 3, ?, ?)', [
+            teamid,
+            req.body.workerid[i],
+            req.body.projectid
+          ], function (err) {
+            if (err) { return next(err); }
+          });
+        }
+      }
     });
-
-    for (let i = 0; i < req.body.workerid.length; i++) {
-      // console.log(req.body.workerid[i])
-      db.run('INSERT INTO team (teamid,projectid,userid,supervisororworker) VALUES (?, ?, ?, 0)', [
-        teamid,
-        req.body.projectid,
-        req.body.workerid[i]
-      ], function (err) {
-        if (err) { return next(err); }
-        var project = {
-          id: this.lastID.toString(),
-          projectid: req.body.projectid,
-          workerid: req.body.workerid[i]
-        };
-        req.login(project, function (err) {
-          if (err) { return next(err); }
-        });
-      });
-    }
   });
-  res.send("Register Project Done")
 });
 
 
@@ -208,9 +190,21 @@ router.post('/api/filtersupervisor', function (req, res, next) {
   });
 });
 
+router.post('/api/filterteamworker', function (req, res, next) {
+  console.log(req.body.projectid)
+  db.all('select name,employee.userid,team_member.teamid,projectname from team,employee,project ,team_member   where team_member.teamid = ?   and team_member.projectid = project.projectid    and employee.userid = team_member.userid  ', [req.body.teamid], function (err, row) {
+    if (err) {
+      console.log(err)
+      return next(err);
+    }
+    console.log(row)
+    res.json(row)
+  });
+});
+
 router.post('/api/getworkerdata', function (req, res, next) {
   console.log(req.body.projectid)
-  db.all('select username,name,projectname,project.projectid,team.teamid from team,employee,project  where team.projectid = ? and team.teamid = ? and team.projectid = project.projectid  and employee.userid = team.userid  and team.supervisororworker = 0', [req.body.projectid,req.body.teamid], function (err, row) {
+  db.all('select username,name,projectname,project.projectid,team.teamid from team,employee,project  where team.projectid = ? and team.teamid = ? and team.projectid = project.projectid  and employee.userid = team.userid  and team.supervisororworker = 0', [req.body.projectid, req.body.teamid], function (err, row) {
     if (err) {
       console.log(err)
       return next(err);
@@ -224,6 +218,18 @@ router.post('/api/getworkerdata', function (req, res, next) {
 router.get('/api/projectname', function (req, res, next) {
   //console.log(req.user)
   db.all("SELECT * FROM project", function (err, row) {
+    if (err) {
+      console.log(err)
+      return next(err);
+    }
+    console.log(row)
+    res.json(row)
+  });
+});
+
+router.get('/api/teamname', function (req, res, next) {
+  //console.log(req.user)
+  db.all("SELECT * FROM team", function (err, row) {
     if (err) {
       console.log(err)
       return next(err);
