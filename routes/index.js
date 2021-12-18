@@ -110,6 +110,27 @@ router.post('/api/assignproject', function (req, res, next) {
   });
 });
 
+router.post('/api/assignsupervisor', function (req, res, next) {
+  db.run('UPDATE team_member SET roleid = 1 WHERE teamid = ? AND userid = ?', [
+    req.body.team,
+    req.body.workerid,
+  ], function (err) {
+    if (err) { return next(err); } 
+  });
+
+  // db.all("SELECT teamid FROM team ORDER BY teamid ASC", function (err, res) {
+  //   console.log(req.body)
+  //   var i = res.length - 1;
+  //   if (err) { console.log(err) }
+  //   console.log(res.length)
+  //   if (res == '') {
+  //     var teamid = res + 1;
+  //   } else {
+  //     var teamid = parseInt(JSON.stringify(res[i].teamid)) + 1;
+  //   }
+
+  // });
+});
 
 
 /* GET users listing. */
@@ -185,19 +206,19 @@ router.post('/api/filtersupervisor', function (req, res, next) {
       console.log(err)
       return next(err);
     }
-    console.log(row)
+    //console.log(row)
     res.json(row)
   });
 });
 
 router.post('/api/filterteamworker', function (req, res, next) {
-  console.log(req.body.projectid)
+  // console.log(req.body.projectid)
   db.all('select name,employee.userid,team_member.teamid,projectname from team,employee,project ,team_member   where team_member.teamid = ?   and team_member.projectid = project.projectid    and employee.userid = team_member.userid  ', [req.body.teamid], function (err, row) {
     if (err) {
       console.log(err)
       return next(err);
     }
-    console.log(row)
+    // console.log(row)
     res.json(row)
   });
 });
@@ -209,7 +230,7 @@ router.post('/api/getworkerdata', function (req, res, next) {
       console.log(err)
       return next(err);
     }
-    console.log(row)
+    //console.log(row)
     res.json(row)
   });
 });
@@ -222,7 +243,7 @@ router.get('/api/projectname', function (req, res, next) {
       console.log(err)
       return next(err);
     }
-    console.log(row)
+    //console.log(row)
     res.json(row)
   });
 });
@@ -234,7 +255,7 @@ router.get('/api/teamname', function (req, res, next) {
       console.log(err)
       return next(err);
     }
-    console.log(row)
+    //console.log(row)
     res.json(row)
   });
 });
