@@ -307,6 +307,17 @@ router.post('/api/filterworker', function (req, res, next) {
   });
 });
 
+router.post('/api/teaminfo', function (req, res, next) {
+  db.all('select team.teamid,project.projectname,team.teamname,team.description,team.projectid FROM TEAM JOIN project ON team.projectid = project.projectid WHERE team.teamid = ?', [ req.body.teamid], function (err, row) {
+    if (err) {
+      console.log(err)
+      return next(err);
+    }
+    //console.log(row)
+    res.json(row)
+  });
+});
+
 // for worker name
 router.get('/api/projectname', function (req, res, next) {
   //console.log(req.user)
@@ -331,6 +342,7 @@ router.get('/api/teamname', function (req, res, next) {
     res.json(row)
   });
 });
+
 
 router.get('/api/logout', function (req, res, next) {
   console.log("logged out")
