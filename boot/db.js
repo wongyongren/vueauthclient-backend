@@ -21,7 +21,9 @@ module.exports = function () {
     db.run("CREATE TABLE IF NOT EXISTS team ( \
       teamid INTEGER PRIMARY KEY AUTOINCREMENT, \
       teamname TEXT UNIQUE,\
-      description TEXT \
+      description TEXT ,\
+      projectid INTEGER,\
+      FOREIGN KEY (projectid) REFERENCES project(projectid) \
       )");
 
     db.run("CREATE TABLE IF NOT EXISTS team_member ( \
