@@ -25,7 +25,7 @@ module.exports = function () {
       )");
 
     db.run("CREATE TABLE IF NOT EXISTS team_member ( \
-      id INTEGER PRIMARY KEY AUTOINCREMENT,\
+      id INTEGER PRIMARY KEY,\
       teamid INTEGER, \
       roleid INTEGER,\
       userid INTEGER, \
