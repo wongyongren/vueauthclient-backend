@@ -166,7 +166,39 @@ router.post('/api/updateteammember', function (req, res, next) {
 //   }
 
 // });
+router.post('/api/deleteteammember', function (req, res, next) {
+  console.log(req.body)
 
+  for (let i = 0; i < req.body.workerid.length; i++) {
+    console.log(req.body.workerid[i],)
+    db.run('DELETE FROM team_member  WHERE teamid = ? AND userid = ?', [
+      req.body.teamid,
+      req.body.workerid[i],
+    ], function (err) {
+      if (err) { 
+        console.log("error")
+        return next(err); }
+    });
+    res.end();
+  }
+});
+
+router.post('/api/insertteammember', function (req, res, next) {
+  console.log(req.body)
+  for (let i = 0; i < req.body.workerid.length; i++) {
+    console.log(req.body.workerid[i],)
+    db.run('INSERT INTO team_member (teamid,roleid,userid,projectid) VALUES (?, 3, ?, ?)', [
+      req.body.teamid,
+      req.body.workerid[i],
+      req.body.projectid,
+    ], function (err) {
+      if (err) { 
+        console.log("error")
+        return next(err); }
+    });
+    res.end();
+  }
+});
 
 
 /* GET users listing. */
