@@ -43,7 +43,20 @@ module.exports = function () {
       rolename TEXT UNIQUE,\
       description TEXT \
       )");
-      
+
+    db.run("CREATE TABLE IF NOT EXISTS worker_time ( \
+      workerid INTEGER PRIMARY KEY AUTOINCREMENT,\
+      teamid INTEGER, \
+      projectid INTEGER,\
+      userid INTEGER, \
+      datein TEXT,\
+      timein TEXT,\
+      dateout TEXT,\
+      timeout TEXT,\
+      FOREIGN KEY (teamid) REFERENCES team(teamid), \
+      FOREIGN KEY (userid) REFERENCES employee(userid), \
+      FOREIGN KEY (projectid) REFERENCES project(projectid) \
+      )");
     // db.run("CREATE TABLE IF NOT EXISTS supervisor ( \
     //   supervisorid INTEGER PRIMARY KEY AUTOINCREMENT,\
     //   projectid INTEGER,\
