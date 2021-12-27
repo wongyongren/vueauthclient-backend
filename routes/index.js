@@ -35,7 +35,7 @@ router.post('/api/register', function (req, res, next) {
     crypto.pbkdf2(req.body.confirm_password, salt, 310000, 32, 'sha256', function (err, hashedConfirmPassword) {
       if (err) { return next(err); }
 
-      db.run('INSERT INTO employee (username,name,role,password,confirm_password,salt) VALUES (?, ?, ?, ?, ?, ?)', [
+      db.run('INSERT INTO user (username,name,role,password,confirm_password,salt) VALUES (?, ?, ?, ?, ?, ?)', [
         req.body.username,
         req.body.name,
         req.body.role,
@@ -58,6 +58,15 @@ router.post('/api/register', function (req, res, next) {
         });
       });
     });
+  });
+});
+
+router.post('/api/registeremployee', function (req, res, next) {
+  db.run('INSERT INTO employee (employeename,userid) VALUES (?, ?)', [
+    req.body.username,
+    req.body.workerid,
+  ], function (err) {
+    if (err) { return next(err); }
   });
 });
 
@@ -243,7 +252,7 @@ router.get('/api/user',
   ensureLoggedIn(), isAdminorSupervisor,
   function (req, res, next) {
     //console.log(req.user)
-    db.get('SELECT rowid AS id, username, name, role FROM employee WHERE rowid = ?', [req.user.id], function (err, row) {
+    db.get('SELECT rowid AS id, username, name, role FROM user WHERE rowid = ?', [req.user.id], function (err, row) {
       if (err) {
         console.log(err)
         return next(err);
@@ -253,7 +262,7 @@ router.get('/api/user',
         id: row.id.toString(),
         username: row.username,
         displayName: row.name,
-        role: row.role
+        role: req.user.role
       };
       res.send({ user: user });
 
@@ -264,7 +273,7 @@ router.get('/api/supervisor',
   ensureLoggedIn(), isAdminorSupervisor,
   function (req, res, next) {
     console.log(req.user)
-    db.all('select employee.name,employee.userid,team_member.teamid,project.projectname,team.teamname,team.description,team.projectid FROM TEAM JOIN project ON team.projectid = project.projectid JOIN team_member ON team_member.projectid = project.projectid JOIN employee ON employee.userid = team_member.userid WHERE team_member.roleid = 1 AND employee.userid = ?', [req.user.id], function (err, row) {
+    db.all('select user.name,user.userid,team_member.teamid,project.projectname,team.teamname,team.description,team.projectid FROM TEAM JOIN project ON team.projectid = project.projectid JOIN team_member ON team_member.projectid = project.projectid JOIN user ON user.userid = team_member.userid WHERE team_member.roleid = 1 AND user.userid = ?', [req.user.id], function (err, row) {
       if (err) {
         console.log(err)
         return next(err);
@@ -278,14 +287,14 @@ router.get('/api/user1',
   ensureLoggedIn(), isUser,
   function (req, res, next) {
     //console.log(req.user)
-    db.get('SELECT rowid AS id, username, name, role FROM employee WHERE rowid = ?', [req.user.id], function (err, row) {
+    db.get('SELECT rowid AS id, username, name, role FROM user WHERE rowid = ?', [req.user.id], function (err, row) {
       if (err) { return next(err); }
 
       var user = {
         id: row.id.toString(),
         username: row.username,
         displayName: row.name,
-        role: row.role
+        role: req.user.role
       };
       res.send({ user: user });
 
@@ -306,7 +315,20 @@ router.get('/api/projectname', function (req, res, next) {
 
 router.get('/api/workername', function (req, res, next) {
   //console.log(req.user)
-  db.all('SELECT * FROM employee where role = "Supervisor" OR role = "User"', function (err, row) {
+  db.all('SELECT * FROM user where role = "Supervisor" OR role = "User"', function (err, row) {
+    if (err) {
+      console.log(err)
+      return next(err);
+    }
+    //console.log(row)
+    res.json(row)
+
+  });
+});
+
+router.get('/api/employeename', function (req, res, next) {
+  //console.log(req.user)
+  db.all('SELECT * FROM employee', function (err, row) {
     if (err) {
       console.log(err)
       return next(err);
@@ -319,7 +341,7 @@ router.get('/api/workername', function (req, res, next) {
 
 router.get('/api/teamworkername', function (req, res, next) {
   //console.log(req.user)
-  db.all('SELECT * FROM employee where role = "Supervisor" OR role = "User"', function (err, row) {
+  db.all('SELECT * FROM user where role = "Supervisor" OR role = "User"', function (err, row) {
     if (err) {
       console.log(err)
       return next(err);
@@ -333,7 +355,7 @@ router.get('/api/teamworkername', function (req, res, next) {
 // for supervisor nameW
 router.post('/api/filtersupervisor', function (req, res, next) {
   console.log(req.body.projectid)
-  db.all('select name,employee.userid,teamid from team,employee,project  where team.projectid = ?  and team.projectid = project.projectid  and employee.userid = team.userid  and team.supervisororworker = 1', [req.body.projectid], function (err, row) {
+  db.all('select name,user.userid,teamid from team,user,project  where team.projectid = ?  and team.projectid = project.projectid  and user.userid = team.userid  and team.supervisororworker = 1', [req.body.projectid], function (err, row) {
     if (err) {
       console.log(err)
       return next(err);
@@ -345,7 +367,7 @@ router.post('/api/filtersupervisor', function (req, res, next) {
 
 router.post('/api/teamsupervisor', function (req, res, next) {
   //console.log(req.body.projectid)
-  db.all('select employee.name,employee.userid,team_member.teamid,project.projectname,team.teamname,team.description,team.projectid FROM TEAM JOIN project ON team.projectid = project.projectid JOIN team_member ON team_member.projectid = project.projectid JOIN employee ON employee.userid = team_member.userid WHERE team.teamid = ? AND team_member.roleid = 1', [req.body.teamid], function (err, row) {
+  db.all('select user.name,user.userid,team_member.teamid,project.projectname,team.teamname,team.description,team.projectid FROM TEAM JOIN project ON team.projectid = project.projectid JOIN team_member ON team_member.projectid = project.projectid JOIN user ON user.userid = team_member.userid WHERE team.teamid = ? AND team_member.roleid = 1', [req.body.teamid], function (err, row) {
     if (err) {
       console.log(err)
       return next(err);
@@ -357,7 +379,7 @@ router.post('/api/teamsupervisor', function (req, res, next) {
 
 router.post('/api/filterteamworker', function (req, res, next) {
   // console.log(req.body.projectid)
-  db.all('select employee.name,employee.userid,team_member.teamid,project.projectname,team.teamname,team.description,team.projectid FROM TEAM JOIN project ON team.projectid = project.projectid JOIN team_member ON team_member.projectid = project.projectid JOIN employee ON employee.userid = team_member.userid WHERE team.teamid = ?', [req.body.teamid], function (err, row) {
+  db.all('select user.name,user.userid,team_member.teamid,project.projectname,team.teamname,team.description,team.projectid FROM TEAM JOIN project ON team.projectid = project.projectid JOIN team_member ON team_member.projectid = project.projectid JOIN user ON user.userid = team_member.userid WHERE team.teamid = ?', [req.body.teamid], function (err, row) {
     if (err) {
       console.log(err)
       return next(err);
@@ -369,7 +391,7 @@ router.post('/api/filterteamworker', function (req, res, next) {
 
 router.post('/api/getworkerdata', function (req, res, next) {
   console.log(req.body.projectid)
-  db.all('select username,name,projectname,project.projectid,team.teamid from team,employee,project  where team.projectid = ? and team.teamid = ? and team.projectid = project.projectid  and employee.userid = team.userid  and team.supervisororworker = 0', [req.body.projectid, req.body.teamid], function (err, row) {
+  db.all('select username,name,projectname,project.projectid,team.teamid from team,user,project  where team.projectid = ? and team.teamid = ? and team.projectid = project.projectid  and user.userid = team.userid  and team.supervisororworker = 0', [req.body.projectid, req.body.teamid], function (err, row) {
     if (err) {
       console.log(err)
       return next(err);
@@ -380,7 +402,7 @@ router.post('/api/getworkerdata', function (req, res, next) {
 });
 
 router.post('/api/filterworker', function (req, res, next) {
-  db.all('select name,employee.userid,team_member.teamid,projectname,teamname,description,team.projectid from team,employee,project ,team_member   where team_member.teamid = ?   and team_member.projectid = project.projectid    and employee.userid = team_member.userid  and team_member.roleid = 3', [req.body.teamid], function (err, row) {
+  db.all('select name,user.userid,team_member.teamid,projectname,teamname,description,team.projectid from team,user,project ,team_member   where team_member.teamid = ?   and team_member.projectid = project.projectid    and user.userid = team_member.userid  and team_member.roleid = 3', [req.body.teamid], function (err, row) {
     if (err) {
       console.log(err)
       return next(err);

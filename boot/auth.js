@@ -13,7 +13,7 @@ module.exports = function() {
   // that the password is correct and then invoke `cb` with a user object, which
   // will be set at `req.user` in route handlers after authentication.
   passport.use(new Strategy(function(username, password, cb) {
-    db.get('SELECT rowid AS id, * FROM employee WHERE username = ?', [ username ], function(err, row) {
+    db.get('SELECT rowid AS id, * FROM user WHERE username = ?', [ username ], function(err, row) {
       if (err) { return cb(err); }
       if (!row) { return cb(null, false, { message: 'Incorrect username or password.' }); }
       
@@ -22,14 +22,38 @@ module.exports = function() {
         if (!crypto.timingSafeEqual(row.password, hashedPassword)) {
           return cb(null, false, { message: 'Incorrect username or password.' });
         }
-        
-        var user = {
-          id: row.id.toString(),
-          username: row.username,
-          displayName: row.name,
-          role:row.role
-        };
-        return cb(null, user);
+        console.log(row.id)
+        db.all('SELECT roleid,teamid,userid from team_member where userid = ?',[row.id],function(err,res)
+        {
+          if (err) { return cb(err); }
+          if (!res) { return cb(null, false, { message: 'Incorrect username or password.' }); }
+          console.log(res[0].roleid)
+          for (let i = 0; i < res.length; i++) {
+            if(res[i].roleid == 1)
+            {
+              var roleid = "Supervisor"
+              break
+            }
+            if (res[i].roleid == 2)
+            {
+              var roleid = "Admin"
+              break
+            }
+            (res[i].roleid == 3)
+            {
+              var roleid = "User"
+              //console.log("123")
+            }
+          }
+          var user = {
+            id: row.id.toString(),
+            username: row.username,
+            displayName: row.name,
+            role:roleid,
+          };
+          return cb(null, user);
+        })
+
       });
     });
   }));

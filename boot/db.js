@@ -4,7 +4,7 @@ var db = require('../db');
 module.exports = function () {
 
   db.serialize(function () {
-    db.run("CREATE TABLE IF NOT EXISTS employee ( \
+    db.run("CREATE TABLE IF NOT EXISTS user ( \
       userid INTEGER PRIMARY KEY AUTOINCREMENT,\
       username TEXT UNIQUE,\
       name TEXT ,\
@@ -12,6 +12,12 @@ module.exports = function () {
       password BLOB,\
       salt BLOB,\
       confirm_password BLOB\
+    )");
+    db.run("CREATE TABLE IF NOT EXISTS employee ( \
+      employeeid INTEGER PRIMARY KEY AUTOINCREMENT,\
+      employeename TEXT UNIQUE,\
+      userid INTEGER UNIQUE,\
+      FOREIGN KEY (userid) REFERENCES user(userid) \
     )");
     db.run("CREATE TABLE IF NOT EXISTS project ( \
       projectid INTEGER PRIMARY KEY AUTOINCREMENT,\
@@ -34,7 +40,7 @@ module.exports = function () {
       projectid INTEGER,\
       FOREIGN KEY (teamid) REFERENCES team(teamid), \
       FOREIGN KEY (roleid) REFERENCES roles(roleid), \
-      FOREIGN KEY (userid) REFERENCES employee(userid), \
+      FOREIGN KEY (userid) REFERENCES user(userid), \
       FOREIGN KEY (projectid) REFERENCES project(projectid) \
       )");
 
@@ -45,24 +51,25 @@ module.exports = function () {
       )");
 
     db.run("CREATE TABLE IF NOT EXISTS worker_time ( \
-      workerid INTEGER PRIMARY KEY AUTOINCREMENT,\
+      workertimeid INTEGER PRIMARY KEY AUTOINCREMENT,\
       teamid INTEGER, \
       projectid INTEGER,\
-      userid INTEGER, \
+      workerid INTEGER, \
       datein TEXT,\
-      timein TEXT,\
+      clockin TEXT,\
       dateout TEXT,\
-      timeout TEXT,\
+      clockout TEXT,\
       FOREIGN KEY (teamid) REFERENCES team(teamid), \
-      FOREIGN KEY (userid) REFERENCES employee(userid), \
-      FOREIGN KEY (projectid) REFERENCES project(projectid) \
+      FOREIGN KEY (workerid) REFERENCES user(userid), \
+      FOREIGN KEY (projectid) REFERENCES project(projectid) ,\
+      UNIQUE (teamid, projectid, workerid, datein) \
       )");
     // db.run("CREATE TABLE IF NOT EXISTS supervisor ( \
     //   supervisorid INTEGER PRIMARY KEY AUTOINCREMENT,\
     //   projectid INTEGER,\
     //   userid INTEGER, \
     //   teamid INTEGER, \
-    //   FOREIGN KEY (userid) REFERENCES employee(userid), \
+    //   FOREIGN KEY (userid) REFERENCES user(userid), \
     //   FOREIGN KEY (projectid) REFERENCES project(projectid) \
     // )");
     // db.run("CREATE TABLE IF NOT EXISTS worker ( \
@@ -71,7 +78,7 @@ module.exports = function () {
     //   userid INTEGER, \
     //   supervisorid INTEGER,\
     //   teamid INTEGER, \
-    //   FOREIGN KEY (userid) REFERENCES employee(userid), \
+    //   FOREIGN KEY (userid) REFERENCES user(userid), \
     //   FOREIGN KEY (supervisorid) REFERENCES supervisor(supervisorid), \
     //   FOREIGN KEY (projectid) REFERENCES project(projectid) \
     // )");
@@ -81,7 +88,7 @@ module.exports = function () {
     //     projectid INTEGER,\
     //     userid INTEGER, \
     //     supervisororworker INTEGER,\
-    //     FOREIGN KEY (userid) REFERENCES employee(userid), \
+    //     FOREIGN KEY (userid) REFERENCES user(userid), \
     //     FOREIGN KEY (projectid) REFERENCES project(projectid) \
     //   )");
   });
