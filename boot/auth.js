@@ -23,37 +23,13 @@ module.exports = function() {
           return cb(null, false, { message: 'Incorrect username or password.' });
         }
         console.log(row.id)
-        db.all('SELECT roleid,teamid,userid from team_member where userid = ?',[row.id],function(err,res)
-        {
-          if (err) { return cb(err); }
-          if (!res) { return cb(null, false, { message: 'Incorrect username or password.' }); }
-          console.log(res[0].roleid)
-          for (let i = 0; i < res.length; i++) {
-            if(res[i].roleid == 1)
-            {
-              var roleid = "Supervisor"
-              break
-            }
-            if (res[i].roleid == 2)
-            {
-              var roleid = "Admin"
-              break
-            }
-            (res[i].roleid == 3)
-            {
-              var roleid = "User"
-              //console.log("123")
-            }
-          }
-          var user = {
-            id: row.id.toString(),
-            username: row.username,
-            displayName: row.name,
-            role:roleid,
-          };
-          return cb(null, user);
-        })
-
+        var user = {
+          id: row.id.toString(),
+          username: row.username,
+          displayName: row.name,
+          role:row.role,
+        };
+        return cb(null, user);
       });
     });
   }));

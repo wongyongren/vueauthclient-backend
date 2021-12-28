@@ -36,11 +36,11 @@ module.exports = function () {
       id INTEGER PRIMARY KEY,\
       teamid INTEGER, \
       roleid INTEGER,\
-      userid INTEGER, \
+      employeeid INTEGER, \
       projectid INTEGER,\
       FOREIGN KEY (teamid) REFERENCES team(teamid), \
       FOREIGN KEY (roleid) REFERENCES roles(roleid), \
-      FOREIGN KEY (userid) REFERENCES user(userid), \
+      FOREIGN KEY (employeeid) REFERENCES employee(employeeid), \
       FOREIGN KEY (projectid) REFERENCES project(projectid) \
       )");
 
@@ -54,15 +54,15 @@ module.exports = function () {
       workertimeid INTEGER PRIMARY KEY AUTOINCREMENT,\
       teamid INTEGER, \
       projectid INTEGER,\
-      workerid INTEGER, \
+      employeeid INTEGER, \
       datein TEXT,\
       clockin TEXT,\
       dateout TEXT,\
       clockout TEXT,\
       FOREIGN KEY (teamid) REFERENCES team(teamid), \
-      FOREIGN KEY (workerid) REFERENCES user(userid), \
+      FOREIGN KEY (employeeid) REFERENCES employee(employeeid), \
       FOREIGN KEY (projectid) REFERENCES project(projectid) ,\
-      UNIQUE (teamid, projectid, workerid, datein) \
+      UNIQUE (teamid, projectid, employeeid, datein) \
       )");
     // db.run("CREATE TABLE IF NOT EXISTS supervisor ( \
     //   supervisorid INTEGER PRIMARY KEY AUTOINCREMENT,\
