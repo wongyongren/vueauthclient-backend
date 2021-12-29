@@ -5,8 +5,8 @@ const LocalStrategy = require('passport-local').Strategy
 var ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn;
 var db = require('../db');
 var router = express.Router();
-const isUser = require('./authMiddleware').isUser;
-const isAdmin = require('./authMiddleware').isAdmin;
+const isTeamSupervisor = require('./authMiddleware').isTeamSupervisor;
+// const isAdmin = require('./authMiddleware').isAdmin;
 
 /* GET users listing. */
 
@@ -274,9 +274,8 @@ router.get('/api/user',
   });
 
 router.get('/api/supervisor',
-  ensureLoggedIn(),
+  ensureLoggedIn(),isTeamSupervisor,
   function (req, res, next) {
-    console.log(req.user)
     db.all('select user.name,user.userid,team_member.teamid,project.projectname,team.teamname,team.description,team.projectid FROM TEAM JOIN project ON team.projectid = project.projectid JOIN team_member ON team_member.projectid = project.projectid JOIN user ON user.userid = team_member.employeeid WHERE team_member.roleid = 1 AND user.userid = ?', [req.user.id], function (err, row) {
       if (err) {
         console.log(err)

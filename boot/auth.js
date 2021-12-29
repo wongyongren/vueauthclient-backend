@@ -4,7 +4,7 @@ var crypto = require('crypto');
 var db = require('../db');
 
 
-module.exports = function() {
+module.exports = function () {
 
   // Configure the local strategy for use by Passport.
   //
@@ -12,24 +12,40 @@ module.exports = function() {
   // (`username` and `password`) submitted by the user.  The function must verify
   // that the password is correct and then invoke `cb` with a user object, which
   // will be set at `req.user` in route handlers after authentication.
-  passport.use(new Strategy(function(username, password, cb) {
-    db.get('SELECT rowid AS id, * FROM user WHERE username = ?', [ username ], function(err, row) {
+  passport.use(new Strategy(function (username, password, cb) {
+    db.get('SELECT rowid AS id, * FROM user WHERE username = ?', [username], function (err, row) {
       if (err) { return cb(err); }
       if (!row) { return cb(null, false, { message: 'Incorrect username or password.' }); }
-      
-      crypto.pbkdf2(password, row.salt, 310000, 32, 'sha256', function(err, hashedPassword) {
+
+      crypto.pbkdf2(password, row.salt, 310000, 32, 'sha256', function (err, hashedPassword) {
         if (err) { return cb(err); }
         if (!crypto.timingSafeEqual(row.password, hashedPassword)) {
           return cb(null, false, { message: 'Incorrect username or password.' });
         }
-        console.log(row.id)
-        var user = {
-          id: row.id.toString(),
-          username: row.username,
-          displayName: row.name,
-          role:row.role,
-        };
-        return cb(null, user);
+        if (row.role == 1)
+        {
+          console.log(row.id)
+          
+          var user = {
+            id: row.id.toString(),
+            username: row.username,
+            displayName: row.name,
+            role: row.role,
+            teamrole: 0
+          };
+          return cb(null, user);
+        }
+        db.get('select employee.employeeid,team_member.roleid FROM user JOIN employee ON user.userid = employee.userid JOIN team_member ON employee.employeeid = team_member.employeeid  WHERE employee.employeeid = ? order by roleid asc', [row.id], function (err, res) {
+          console.log(row.id)
+          var user = {
+            id: row.id.toString(),
+            username: row.username,
+            displayName: row.name,
+            role: row.role,
+            teamrole: res.roleid
+          };
+          return cb(null, user);
+        });
       });
     });
   }));
@@ -42,14 +58,14 @@ module.exports = function() {
   // typical implementation of this is as simple as supplying the user ID when
   // serializing, and querying the user record by ID from the database when
   // deserializing.
-  passport.serializeUser(function(user, cb) {
-    process.nextTick(function() {
-      cb(null, { id: user.id, username: user.username,role: user.role });
+  passport.serializeUser(function (user, cb) {
+    process.nextTick(function () {
+      cb(null, { id: user.id, username: user.username, role: user.role, teamrole: user.teamrole });
     });
   });
 
-  passport.deserializeUser(function(user, cb) {
-    process.nextTick(function() {
+  passport.deserializeUser(function (user, cb) {
+    process.nextTick(function () {
       return cb(null, user);
     });
   });
