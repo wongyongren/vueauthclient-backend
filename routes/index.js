@@ -164,18 +164,27 @@ router.post('/api/updateteammember', function (req, res, next) {
     res.end();
   }
 });
-// db.all("SELECT teamid FROM team ORDER BY teamid ASC", function (err, res) {
-//   console.log(req.body)
-//   var i = res.length - 1;
-//   if (err) { console.log(err) }
-//   console.log(res.length)
-//   if (res == '') {
-//     var teamid = res + 1;
-//   } else {
-//     var teamid = parseInt(JSON.stringify(res[i].teamid)) + 1;
-//   }
 
-// });
+router.post('/api/insertworkertime', function (req, res, next) {
+  console.log(req.body)
+  for (let i = 0; i < req.body.workerid.length; i++) {
+    //console.log(req.body.workerid[i],)
+    db.run('INSERT INTO worker_time (teamid,projectid,employeeid,datein,clockin,dateout,clockout) VALUES (?, ?, ?, ?, ?, ?, ?)', [
+      req.body.teamid,
+      req.body.projectid,
+      req.body.workerid[i],
+      req.body.datein,
+      req.body.timein,
+      req.body.dateout,
+      req.body.timeout,
+
+    ], function (err) {
+      if (err) { res.end(); return next(err); }
+    });
+    res.end();
+  }
+});
+
 router.post('/api/deleteteammember', function (req, res, next) {
   console.log(req.body)
 
@@ -193,6 +202,7 @@ router.post('/api/deleteteammember', function (req, res, next) {
     res.end();
   }
 });
+
 
 router.post('/api/insertteammember', function (req, res, next) {
   console.log(req.body)
@@ -256,10 +266,9 @@ router.get('/api/user',
         console.log(err)
         return next(err);
       }
-      if(req.user.role == 1)
-      {
+      if (req.user.role == 1) {
         var role = "admin"
-      }else{
+      } else {
         var role = "user"
       }
       var user = {
@@ -274,7 +283,7 @@ router.get('/api/user',
   });
 
 router.get('/api/supervisor',
-  ensureLoggedIn(),isTeamSupervisor,
+  ensureLoggedIn(), isTeamSupervisor,
   function (req, res, next) {
     db.all('select user.name,user.userid,team_member.teamid,project.projectname,team.teamname,team.description,team.projectid FROM TEAM JOIN project ON team.projectid = project.projectid JOIN team_member ON team_member.projectid = project.projectid JOIN user ON user.userid = team_member.employeeid WHERE team_member.roleid = 1 AND user.userid = ?', [req.user.id], function (err, row) {
       if (err) {
@@ -287,15 +296,14 @@ router.get('/api/supervisor',
   });
 
 router.get('/api/user1',
-  ensureLoggedIn(), 
+  ensureLoggedIn(),
   function (req, res, next) {
     //console.log(req.user)
     db.get('SELECT rowid AS id, username, name, role FROM user WHERE rowid = ?', [req.user.id], function (err, row) {
       if (err) { return next(err); }
-      if(req.user.role == 1)
-      {
+      if (req.user.role == 1) {
         var role = "admin"
-      }else{
+      } else {
         var role = "user"
       }
       var user = {
