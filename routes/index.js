@@ -166,7 +166,6 @@ router.post('/api/updateteammember', function (req, res, next) {
 });
 
 router.post('/api/insertworkertime', function (req, res, next) {
-  console.log(req.body)
   for (let i = 0; i < req.body.workerid.length; i++) {
     //console.log(req.body.workerid[i],)
     db.run('INSERT INTO worker_time (teamid,projectid,employeeid,datein,clockin,dateout,clockout) VALUES (?, ?, ?, ?, ?, ?, ?)', [
@@ -179,9 +178,12 @@ router.post('/api/insertworkertime', function (req, res, next) {
       req.body.timeout,
 
     ], function (err) {
-      if (err) { res.end(); return next(err); }
+      if (err) { 
+        // return res.send("Register Project Done"); 
+      }
     });
-    res.end();
+    res.json({data:"Register Project Done"}); 
+    //res.end();
   }
 });
 
