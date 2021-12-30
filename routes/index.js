@@ -15,7 +15,7 @@ router.post("/api/login", (req, res, next) => {
     if (err) {
       return next(err);
     }
-    console.log(user)
+    console.log( "abc")
 
     if (!user) {
       return res.status(400).send([user, "Cannot log in", info])
@@ -259,7 +259,7 @@ router.post('/api/insertteamsupervisor', function (req, res, next) {
 
 /* GET users listing. */
 router.get('/api/user',
-  ensureLoggedIn(),
+  // ensureLoggedIn(),
   function (req, res, next) {
     console.log(req.user)
     db.get('SELECT rowid AS id, username, name, role FROM user WHERE rowid = ?', [req.user.id], function (err, row) {
