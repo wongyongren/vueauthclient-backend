@@ -176,13 +176,12 @@ router.post('/api/insertworkertime', function (req, res, next) {
       req.body.timein,
       req.body.dateout,
       req.body.timeout,
-
     ], function (err) {
-      if (err) { 
+      if (err) {
         // return res.send("Register Project Done"); 
       }
     });
-    res.json({data:"Register Project Done"}); 
+    res.json({ data: "Register Project Done" });
     //res.end();
   }
 });
@@ -288,6 +287,32 @@ router.get('/api/supervisor',
   ensureLoggedIn(), isTeamSupervisor,
   function (req, res, next) {
     db.all('select user.name,user.userid,team_member.teamid,project.projectname,team.teamname,team.description,team.projectid FROM TEAM JOIN project ON team.projectid = project.projectid JOIN team_member ON team_member.projectid = project.projectid JOIN user ON user.userid = team_member.employeeid WHERE team_member.roleid = 1 AND user.userid = ?', [req.user.id], function (err, row) {
+      if (err) {
+        console.log(err)
+        return next(err);
+      }
+      console.log(row)
+      res.json(row)
+    });
+  });
+
+  router.get('/api/supervisorandteam',
+  ensureLoggedIn(), isTeamSupervisor,
+  function (req, res, next) {
+    db.all('SELECT teamid FROM user Natural JOIN employee Natural JOIN team_member where roleid = 1  ', [req.user.id], function (err, row) {
+      if (err) {
+        console.log(err)
+        return next(err);
+      }
+      console.log(row)
+      res.json(row)
+    });
+  });
+
+router.get('/api/reportlist',
+  ensureLoggedIn(), 
+  function (req, res, next) {
+    db.all('SELECT * FROM worker_time Natural JOIN employee Natural JOIN project natural join team WHERE datein = "2021-12-30" order by projectname ASC, teamname ASC, datein ASC, clockin ASC ', function (err, row) {
       if (err) {
         console.log(err)
         return next(err);
