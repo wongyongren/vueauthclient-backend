@@ -15,7 +15,7 @@ router.post("/api/login", (req, res, next) => {
     if (err) {
       return next(err);
     }
-    console.log( "abc")
+    console.log(user)
 
     if (!user) {
       return res.status(400).send([user, "Cannot log in", info])
@@ -61,7 +61,8 @@ router.post('/api/register', function (req, res, next) {
 });
 
 router.post('/api/registeremployee', function (req, res, next) {
-  db.run('INSERT INTO employee (employeename,employeeid) VALUES (?, ?)', [
+  //console.log(req.body)
+  db.run('INSERT INTO employee (employeename,userid) VALUES (?, ?)', [
     req.body.username,
     req.body.workerid,
   ], function (err) {
@@ -259,7 +260,7 @@ router.post('/api/insertteamsupervisor', function (req, res, next) {
 
 /* GET users listing. */
 router.get('/api/user',
-  // ensureLoggedIn(),
+  ensureLoggedIn(),
   function (req, res, next) {
     console.log(req.user)
     db.get('SELECT rowid AS id, username, name, role FROM user WHERE rowid = ?', [req.user.id], function (err, row) {
@@ -296,7 +297,7 @@ router.get('/api/supervisor',
     });
   });
 
-  router.get('/api/supervisorandteam',
+router.get('/api/supervisorandteam',
   ensureLoggedIn(), isTeamSupervisor,
   function (req, res, next) {
     db.all('SELECT teamid FROM user Natural JOIN employee Natural JOIN team_member where roleid = 1  ', [req.user.id], function (err, row) {
@@ -310,15 +311,45 @@ router.get('/api/supervisor',
   });
 
 router.get('/api/reportlist',
-  ensureLoggedIn(), 
+  // ensureLoggedIn(), 
   function (req, res, next) {
-    db.all('SELECT * FROM worker_time Natural JOIN employee Natural JOIN project natural join team WHERE datein = "2021-12-30" order by projectname ASC, teamname ASC, datein ASC, clockin ASC ', function (err, row) {
+    var currentsite = ""
+    var currentTeam = ""
+    db.all('SELECT * FROM worker_time Natural JOIN employee Natural JOIN project natural join team WHERE datein = "2021-12-31" order by projectname ASC, teamname ASC, datein ASC, clockin ASC ', function (err, row) {
       if (err) {
         console.log(err)
         return next(err);
       }
-      console.log(row)
-      res.json(row)
+      //console.log(row)
+      data = {}
+      for (let i = 0; i < row.length; i++) {
+        if(currentsite != row[i].projectname) {
+          currentsite = row[i].projectname
+          data[currentsite] = {}
+        } else {
+          if (currentTeam != row[i].teamname ) {
+            currentTeam = row[i].teamname
+            data[currentTeam] = {}
+          }
+          data[currentsite][currentTeam] = {
+            currentsite: row[i].projectname,
+            id: row[i].workertimeid,
+            projectname: row[i].projectname,
+            employeename: row[i].employeename,
+            datein: row[i].datein,
+            clockin: row[i].clockin,
+            dateout: row[i].dateout,
+            clockout: row[i].clockout,
+          }
+          
+        }
+      }
+      console.log(data)
+      res.json(data)
+      //console.log(data)
+      
+      // res.send({ user: user });
+      // res.json(data)
     });
   });
 
@@ -358,7 +389,7 @@ router.get('/api/projectname', function (req, res, next) {
 
 router.get('/api/workername', function (req, res, next) {
   //console.log(req.user)
-  db.all('SELECT * FROM user where role == 0', function (err, row) {
+  db.all('SELECT * FROM user where role == "User"', function (err, row) {
     if (err) {
       console.log(err)
       return next(err);

@@ -38,8 +38,8 @@ module.exports = function () {
 
         } else {
 
-          db.get('select employee.employeeid,team_member.roleid FROM user JOIN employee ON user.userid = employee.userid JOIN team_member ON employee.employeeid = team_member.employeeid  WHERE employee.employeeid = ? order by roleid asc', [row.id], function (err, res) {
-            var user = {
+          db.get('select employee.employeeid,team_member.roleid FROM user JOIN employee ON user.userid = employee.userid JOIN team_member ON employee.employeeid = team_member.employeeid  WHERE user.userid = ? order by roleid asc', [row.id], function (err, res) {
+            user = {
               id: row.id.toString(),
               username: row.username,
               displayName: row.name,
