@@ -17,35 +17,39 @@ module.exports = function () {
       if (err) { return cb(err); }
       if (!row) { return cb(null, false, { message: 'Incorrect username or password.' }); }
 
+
+      console.log(row)
       crypto.pbkdf2(password, row.salt, 310000, 32, 'sha256', function (err, hashedPassword) {
         if (err) { return cb(err); }
         if (!crypto.timingSafeEqual(row.password, hashedPassword)) {
           return cb(null, false, { message: 'Incorrect username or password.' });
         }
-        if (row.role == 1)
-        {
-          console.log(row.id)
-          
+
+        if (row.role == "Admin") { //admin
+
           var user = {
             id: row.id.toString(),
             username: row.username,
             displayName: row.name,
-            role: row.role,
+            //role: row.role,
+            role: 1,
             teamrole: 0
           };
-          return cb(null, user);
+
+        } else {
+
+          db.get('select employee.employeeid,team_member.roleid FROM user JOIN employee ON user.userid = employee.userid JOIN team_member ON employee.employeeid = team_member.employeeid  WHERE employee.employeeid = ? order by roleid asc', [row.id], function (err, res) {
+            var user = {
+              id: row.id.toString(),
+              username: row.username,
+              displayName: row.name,
+              role: row.role,
+              teamrole: res.roleid
+            };
+          });
         }
-        db.get('select employee.employeeid,team_member.roleid FROM user JOIN employee ON user.userid = employee.userid JOIN team_member ON employee.employeeid = team_member.employeeid  WHERE employee.employeeid = ? order by roleid asc', [row.id], function (err, res) {
-          console.log(row.id)
-          var user = {
-            id: row.id.toString(),
-            username: row.username,
-            displayName: row.name,
-            role: row.role,
-            teamrole: res.roleid
-          };
-          return cb(null, user);
-        });
+
+        return cb(null, user);
       });
     });
   }));
