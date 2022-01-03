@@ -315,23 +315,22 @@ router.get('/api/reportlist',
   function (req, res, next) {
     var currentsite = ""
     var currentTeam = ""
-    db.all('SELECT * FROM worker_time Natural JOIN employee Natural JOIN project natural join team WHERE datein = "2021-12-31" order by projectname ASC, teamname ASC, datein ASC, clockin ASC ', function (err, row) {
+    db.all('SELECT workertimeid, datein, clockin, dateout, clockout, employeename, projectname, teamname FROM worker_time JOIN employee ON worker_time.employeeid = employee.employeeid JOIN project ON worker_time.projectid = project.projectid Join team ON worker_time.teamid = team.teamid WHERE datein = "2021-12-31" order by projectname ASC, teamname ASC, datein ASC, clockin ASC ', function (err, row) {
       if (err) {
         console.log(err)
         return next(err);
       }
-      //console.log(row)
-      data = {}
+      var data = {}
       for (let i = 0; i < row.length; i++) {
-        if(currentsite != row[i].projectname) {
+
+        if (currentsite != row[i].projectname) {
           currentsite = row[i].projectname
           data[currentsite] = {}
-        } else {
-          if (currentTeam != row[i].teamname ) {
+          if (currentTeam != row[i].teamname) {
             currentTeam = row[i].teamname
-            data[currentTeam] = {}
+            data[currentsite][currentTeam] = {}
           }
-          data[currentsite][currentTeam] = {
+          data[currentsite][currentTeam][i] = {
             currentsite: row[i].projectname,
             id: row[i].workertimeid,
             projectname: row[i].projectname,
@@ -341,15 +340,25 @@ router.get('/api/reportlist',
             dateout: row[i].dateout,
             clockout: row[i].clockout,
           }
-          
+        } else {
+          if (currentTeam != row[i].teamname) {
+            currentTeam = row[i].teamname
+            data[currentsite][currentTeam] = {}
+          }
+          data[currentsite][currentTeam][i] = {
+            currentsite: row[i].projectname,
+            id: row[i].workertimeid,
+            projectname: row[i].projectname,
+            employeename: row[i].employeename,
+            datein: row[i].datein,
+            clockin: row[i].clockin,
+            dateout: row[i].dateout,
+            clockout: row[i].clockout,
+          }
         }
       }
-      console.log(data)
-      res.json(data)
       //console.log(data)
-      
-      // res.send({ user: user });
-      // res.json(data)
+      res.json(data)
     });
   });
 
