@@ -38,15 +38,15 @@ module.exports = function () {
 
         } else {
 
-          db.get('select employee.employeeid,team_member.roleid FROM user JOIN employee ON user.userid = employee.userid JOIN team_member ON employee.employeeid = team_member.employeeid  WHERE user.userid = ? order by roleid asc', [row.id], function (err, res) {
+          //db.get('select employee.employeeid,team_member.roleid FROM user JOIN employee ON user.userid = employee.userid JOIN team_member ON employee.employeeid = team_member.employeeid  WHERE user.userid = ? order by roleid asc', [row.id], function (err, res) {
             user = {
               id: row.id.toString(),
               username: row.username,
               displayName: row.name,
-              role: row.role,
-              teamrole: res.roleid
+              role: 1,
+              teamrole: 1
             };
-          });
+          //});
         }
 
         return cb(null, user);
