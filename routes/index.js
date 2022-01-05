@@ -206,6 +206,42 @@ router.post('/api/deleteteammember', function (req, res, next) {
   }
 });
 
+router.post('/api/deleteworkertime', function (req, res, next) {
+  console.log(req.body)
+
+
+  db.run('DELETE FROM worker_time  WHERE workertimeid = ?', [
+    req.body.workertimeid,
+  ], function (err) {
+    if (err) {
+      console.log("error")
+      return next(err);
+    }
+  });
+  res.status(200).send("Success")
+
+});
+
+
+router.post('/api/updateworkertime', function (req, res, next) {
+  console.log(req.body)
+  db.run('UPDATE worker_time SET datein = ? , dateout = ? , clockin = ? , clockout = ? WHERE workertimeid = ? ', [
+    req.body.datein,
+    req.body.dateout,
+    req.body.clockin,
+    req.body.clockout,
+    req.body.workertimeid,
+  ], function (err) {
+    if (err) {
+      console.log("error")
+      return next(err);
+    }
+
+    res.status(200).send("Success")
+
+  });
+ 
+});
 
 router.post('/api/insertteammember', function (req, res, next) {
   console.log(req.body)
@@ -316,7 +352,7 @@ router.post('/api/supervisorreportlist',
   // ensureLoggedIn(), 
   function (req, res, next) {
     console.log(req.body)
-    db.all('SELECT workertimeid, datein, clockin, dateout, clockout, employeename, projectname, teamname FROM worker_time JOIN employee ON worker_time.employeeid = employee.employeeid JOIN project ON worker_time.projectid = project.projectid Join team ON worker_time.teamid = team.teamid WHERE datein = ? order by projectname ASC, teamname ASC, datein ASC, clockin ASC ', [req.body.date], function (err, row) {
+    db.all('SELECT workertimeid, datein, clockin, dateout, clockout, employeename, projectname, teamname FROM worker_time JOIN employee ON worker_time.employeeid = employee.employeeid JOIN project ON worker_time.projectid = project.projectid Join team ON worker_time.teamid = team.teamid WHERE datein = ? or datein = ? order by datein ASC,projectname ASC, teamname ASC,  clockin ASC ', [req.body.date, req.body.tomorrow], function (err, row) {
       if (err) {
         console.log(err)
         return next(err);
