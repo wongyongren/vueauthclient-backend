@@ -236,11 +236,9 @@ router.post('/api/updateworkertime', function (req, res, next) {
       console.log("error")
       return next(err);
     }
-
     res.status(200).send("Success")
-
   });
- 
+
 });
 
 router.post('/api/insertteammember', function (req, res, next) {
