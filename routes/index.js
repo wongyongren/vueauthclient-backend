@@ -178,14 +178,13 @@ router.post('/api/insertworkertime', function (req, res, next) {
       req.body.dateout,
       req.body.timeout,
     ], function (err) {
-      if (err) {
-        // return res.send("Register Project Done"); 
+      if (err) { res.status(500).json({ data: "Register Project Fail" }); return next(err); }
+      else {
+        res.json({ data: "Register Project Done" });
       }
     });
 
-    //res.end();
   }
-  res.json({ data: "Register Project Done" });
 });
 
 router.post('/api/deleteteammember', function (req, res, next) {
@@ -208,8 +207,6 @@ router.post('/api/deleteteammember', function (req, res, next) {
 
 router.post('/api/deleteworkertime', function (req, res, next) {
   console.log(req.body)
-
-
   db.run('DELETE FROM worker_time  WHERE workertimeid = ?', [
     req.body.workertimeid,
   ], function (err) {
@@ -219,7 +216,6 @@ router.post('/api/deleteworkertime', function (req, res, next) {
     }
   });
   res.status(200).send("Success")
-
 });
 
 
@@ -233,13 +229,133 @@ router.post('/api/updateworkertime', function (req, res, next) {
     req.body.workertimeid,
   ], function (err) {
     if (err) {
-      console.log("error")
       return next(err);
     }
     res.status(200).send("Success")
   });
-
 });
+
+//user
+router.post('/api/deleteuser', function (req, res, next) {
+  console.log(req.body)
+  db.run('DELETE FROM user  WHERE userid = ?', [
+    req.body.userid,
+  ], function (err) {
+    if (err) {
+      console.log("error")
+      return next(err);
+    }
+  });
+  res.status(200).send("Success")
+});
+
+
+router.post('/api/updateuser', function (req, res, next) {
+  //will consider again with how to check password and salt
+  console.log(req.body)
+  db.run('UPDATE user SET username = ? , name = ? , role = ? , password = ? , confirm_password = ? , salt = ? WHERE userid = ? ', [
+    req.body.username,
+    req.body.name,
+    req.body.role,
+    req.body.password,
+    req.body.confirm_password,
+    req.body.salt,
+    req.body.userid,
+  ], function (err) {
+    if (err) {
+      return next(err);
+    }
+    res.status(200).send("Success")
+  });
+});
+
+//employee
+router.post('/api/deleteemployee', function (req, res, next) {
+  console.log(req.body)
+  db.run('DELETE FROM employee  WHERE employeeid = ?', [
+    req.body.employeeid,
+  ], function (err) {
+    if (err) {
+      console.log("error")
+      return next(err);
+    }
+  });
+  res.status(200).send("Success")
+});
+
+
+router.post('/api/updateemployee', function (req, res, next) {
+  console.log(req.body)
+  db.run('UPDATE employee SET employeename = ? , userid = ? WHERE employeeid = ? ', [
+    req.body.employeename,
+    req.body.userid,
+    req.body.employeeid,
+  ], function (err) {
+    if (err) {
+      return next(err);
+    }
+    res.status(200).send("Success")
+  });
+});
+
+//project
+router.post('/api/deleteproject', function (req, res, next) {
+  console.log(req.body)
+  db.run('DELETE FROM project WHERE projectid = ?', [
+    req.body.projectid,
+  ], function (err) {
+    if (err) {
+      console.log("error")
+      return next(err);
+    }
+  });
+  res.status(200).send("Success")
+});
+
+
+router.post('/api/updateproject', function (req, res, next) {
+  console.log(req.body)
+  db.run('UPDATE project SET projectname = ? , projectaddress = ? WHERE projectid = ? ', [
+    req.body.projectname,
+    req.body.projectaddress,
+  ], function (err) {
+    if (err) {
+      return next(err);
+    }
+    res.status(200).send("Success")
+  });
+});
+
+//team
+router.post('/api/deleteteam', function (req, res, next) {
+  console.log(req.body)
+  db.run('DELETE FROM team WHERE teamid = ?', [
+    req.body.teamid,
+  ], function (err) {
+    if (err) {
+      console.log("error")
+      return next(err);
+    }
+  });
+  res.status(200).send("Success")
+});
+
+
+router.post('/api/updateteam', function (req, res, next) {
+  console.log(req.body)
+  db.run('UPDATE team SET teamname = ? , description = ? , projectid = ?  WHERE teamid = ? ', [
+    req.body.teamname,
+    req.body.description,
+    req.body.projectid,
+    req.body.teamid,
+  ], function (err) {
+    if (err) {
+      return next(err);
+    }
+    res.status(200).send("Success")
+  });
+});
+
 
 router.post('/api/insertteammember', function (req, res, next) {
   console.log(req.body)
@@ -460,6 +576,19 @@ router.get('/api/workername', function (req, res, next) {
   });
 });
 
+router.get('/api/username', function (req, res, next) {
+  //console.log(req.user)
+  db.all("SELECT * FROM user ", function (err, row) {
+    if (err) {
+      console.log(err)
+      return next(err);
+    }
+    //console.log(row)
+    res.json(row)
+
+  });
+});
+
 router.get('/api/employeename', function (req, res, next) {
   //console.log(req.user)
   db.all('SELECT * FROM employee', function (err, row) {
@@ -572,7 +701,7 @@ router.get('/api/projectname', function (req, res, next) {
 
 router.get('/api/teamname', function (req, res, next) {
   //console.log(req.user)
-  db.all("SELECT * FROM team", function (err, row) {
+  db.all("SELECT * FROM team join project ON team.projectid = project.projectid", function (err, row) {
     if (err) {
       console.log(err)
       return next(err);
