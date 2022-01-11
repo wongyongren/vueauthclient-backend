@@ -238,7 +238,7 @@ router.post('/api/updateworkertime', function (req, res, next) {
 //user
 router.post('/api/deleteuser', function (req, res, next) {
   console.log(req.body)
-  db.run('DELETE FROM user  WHERE userid = ?', [
+  db.run('DELETE FROM user WHERE userid = ?', [
     req.body.userid,
   ], function (err) {
     if (err) {
@@ -249,30 +249,42 @@ router.post('/api/deleteuser', function (req, res, next) {
   res.status(200).send("Success")
 });
 
-
 router.post('/api/updateuser', function (req, res, next) {
-  //will consider again with how to check password and salt
   console.log(req.body)
-  db.run('UPDATE user SET username = ? , name = ? , role = ? , password = ? , confirm_password = ? , salt = ? WHERE userid = ? ', [
-    req.body.username,
-    req.body.name,
-    req.body.role,
-    req.body.password,
-    req.body.confirm_password,
-    req.body.salt,
-    req.body.userid,
-  ], function (err) {
-    if (err) {
-      return next(err);
-    }
-    res.status(200).send("Success")
-  });
+  if (req.body.password != null) {
+    db.run('UPDATE user SET username = ? , name = ? , role = ? , password = ? , confirm_password = ? , salt = ? WHERE userid = ? ', [
+      req.body.username,
+      req.body.name,
+      req.body.role,
+      req.body.password,
+      req.body.confirm_password,
+      req.body.salt,
+      req.body.userid,
+    ], function (err) {
+      if (err) {
+        return next(err);
+      }
+      res.status(200).send("Success with password")
+    });
+  } else {
+    db.run('UPDATE user SET username = ? , name = ? , role = ? WHERE userid = ? ', [
+      req.body.username,
+      req.body.name,
+      req.body.role,
+      req.body.userid,
+    ], function (err) {
+      if (err) {
+        return next(err);
+      }
+      res.status(200).send("Success without password")
+    });
+  }
 });
 
 //employee
 router.post('/api/deleteemployee', function (req, res, next) {
   console.log(req.body)
-  db.run('DELETE FROM employee  WHERE employeeid = ?', [
+  db.run('DELETE FROM employee WHERE employeeid = ?', [
     req.body.employeeid,
   ], function (err) {
     if (err) {
@@ -312,12 +324,12 @@ router.post('/api/deleteproject', function (req, res, next) {
   res.status(200).send("Success")
 });
 
-
 router.post('/api/updateproject', function (req, res, next) {
   console.log(req.body)
   db.run('UPDATE project SET projectname = ? , projectaddress = ? WHERE projectid = ? ', [
     req.body.projectname,
     req.body.projectaddress,
+    req.body.projectid,
   ], function (err) {
     if (err) {
       return next(err);
@@ -591,7 +603,7 @@ router.get('/api/username', function (req, res, next) {
 
 router.get('/api/employeename', function (req, res, next) {
   //console.log(req.user)
-  db.all('SELECT * FROM employee', function (err, row) {
+  db.all('SELECT * FROM employee left join user on employee.userid = user.userid', function (err, row) {
     if (err) {
       console.log(err)
       return next(err);
