@@ -282,6 +282,21 @@ router.post('/api/updateuser', function (req, res, next) {
 });
 
 //employee
+router.post('/api/displayemployee', function (req, res, next) {
+  console.log(req.body)
+
+  db.get('SELECT employeeid, employeename, user.userid, name FROM employee join user on employee.userid = user.userid WHERE employeeid = ?', [req.body.employeeid], function (err, row) {
+    if (err) {
+      console.log(err)
+      return next(err);
+    }
+
+    res.send(row);
+
+  });
+
+});
+
 router.post('/api/deleteemployee', function (req, res, next) {
   console.log(req.body)
   db.run('DELETE FROM employee WHERE employeeid = ?', [
@@ -627,7 +642,19 @@ router.get('/api/teamworkername', function (req, res, next) {
   });
 });
 
-// for supervisor nameW
+// for supervisor name
+router.post('/api/filtersupervisor', function (req, res, next) {
+  console.log(req.body.projectid)
+  db.all('select name,user.userid,teamid from team,user,project  where team.projectid = ?  and team.projectid = project.projectid  and user.userid = team.employeeid  and team.supervisororworker = 1', [req.body.projectid], function (err, row) {
+    if (err) {
+      console.log(err)
+      return next(err);
+    }
+    //console.log(row)
+    res.json(row)
+  });
+});
+
 router.post('/api/filtersupervisor', function (req, res, next) {
   console.log(req.body.projectid)
   db.all('select name,user.userid,teamid from team,user,project  where team.projectid = ?  and team.projectid = project.projectid  and user.userid = team.employeeid  and team.supervisororworker = 1', [req.body.projectid], function (err, row) {
