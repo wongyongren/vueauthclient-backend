@@ -236,6 +236,17 @@ router.post('/api/updateworkertime', function (req, res, next) {
 });
 
 //user
+router.post('/api/displayuser', function (req, res, next) {
+  console.log(req.body)
+  db.get('SELECT userid, username, name, role, password FROM user WHERE userid = ?', [req.body.userid], function (err, row) {
+    if (err) {
+      console.log(err)
+      return next(err);
+    }
+    res.send(row);
+  });
+});
+
 router.post('/api/deleteuser', function (req, res, next) {
   console.log(req.body)
   db.run('DELETE FROM user WHERE userid = ?', [
@@ -326,6 +337,17 @@ router.post('/api/updateemployee', function (req, res, next) {
 });
 
 //project
+router.post('/api/displayproject', function (req, res, next) {
+  console.log(req.body)
+  db.get('SELECT projectid, projectname, projectaddress FROM project WHERE projectid = ?', [req.body.projectid], function (err, row) {
+    if (err) {
+      console.log(err)
+      return next(err);
+    }
+    res.send(row);
+  });
+});
+
 router.post('/api/deleteproject', function (req, res, next) {
   console.log(req.body)
   db.run('DELETE FROM project WHERE projectid = ?', [
