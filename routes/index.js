@@ -376,6 +376,17 @@ router.post('/api/updateproject', function (req, res, next) {
 });
 
 //team
+router.post('/api/displayteam', function (req, res, next) {
+  console.log(req.body)
+  db.get('SELECT teamid, teamname, description, team.projectid, projectname FROM team join  project on team.projectid = project.projectid  WHERE teamid = ?', [req.body.teamid], function (err, row) {
+    if (err) {
+      console.log(err)
+      return next(err);
+    }
+    res.send(row);
+  });
+});
+
 router.post('/api/deleteteam', function (req, res, next) {
   console.log(req.body)
   db.run('DELETE FROM team WHERE teamid = ?', [
