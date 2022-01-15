@@ -263,13 +263,9 @@ router.post('/api/deleteuser', function (req, res, next) {
 router.post('/api/updateuser', function (req, res, next) {
   console.log(req.body)
   if (req.body.password != null) {
-    db.run('UPDATE user SET username = ? , name = ? , role = ? , password = ? , confirm_password = ? , salt = ? WHERE userid = ? ', [
-      req.body.username,
+    db.run('UPDATE user SET name = ? , password = ? WHERE userid = ? ', [
       req.body.name,
-      req.body.role,
       req.body.password,
-      req.body.confirm_password,
-      req.body.salt,
       req.body.userid,
     ], function (err) {
       if (err) {
@@ -278,8 +274,34 @@ router.post('/api/updateuser', function (req, res, next) {
       res.status(200).send("Success with password")
     });
   } else {
-    db.run('UPDATE user SET username = ? , name = ? , role = ? WHERE userid = ? ', [
-      req.body.username,
+    db.run('UPDATE user SET name = ?  WHERE userid = ? ', [
+      req.body.name,
+      req.body.userid,
+    ], function (err) {
+      if (err) {
+        return next(err);
+      }
+      res.status(200).send("Success without password")
+    });
+  }
+});
+
+router.post('/api/adminupdateuser', function (req, res, next) {
+  console.log(req.body)
+  if (req.body.password != null) {
+    db.run('UPDATE user SET name = ? , password = ?, role = ? WHERE userid = ? ', [
+      req.body.name,
+      req.body.password,
+      req.body.role,
+      req.body.userid,
+    ], function (err) {
+      if (err) {
+        return next(err);
+      }
+      res.status(200).send("Success with password")
+    });
+  } else {
+    db.run('UPDATE user SET name = ? ,role = ?  WHERE userid = ? ', [
       req.body.name,
       req.body.role,
       req.body.userid,
